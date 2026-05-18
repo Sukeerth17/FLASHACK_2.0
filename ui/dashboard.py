@@ -254,12 +254,12 @@ try:
         with col5:
             st.metric("Throughput Rate", f"{metrics['throughput']} tasks/t")
 
-        # Dashboard content split into sections via tabs
-        tab_graph, tab_gantt, tab_queue, tab_logs = st.tabs([
+        tab_graph, tab_gantt, tab_queue, tab_logs, tab_dfs = st.tabs([
             "📊 Network Dependency Graph (DAA)",
             "📅 OS Context Switch Gantt",
             "🖥️ Resource & Queue Monitor",
-            "📜 Preemption & Boot Logs"
+            "📜 Preemption & Boot Logs",
+            "🔀 DFS Boot Sequence"
         ])
         
         with tab_graph:
@@ -278,8 +278,7 @@ try:
                 for idx, node_id in enumerate(critical_path):
                     st.markdown(f"**Step {idx+1}:** `{node_id}`")
                         
-                st.subheader("DFS Sort Output")
-                st.write(" -> ".join(topo_order))
+
                 
         with tab_gantt:
             st.subheader("Thread Execution Timeline (OS Gantt)")
@@ -344,6 +343,42 @@ try:
             for log in scheduler.context_switch_logs:
                 log_text += log + "\n"
             st.text_area("Live Output Console", log_text, height=400)
+
+        with tab_dfs:
+            st.subheader("Depth-First Search Topological Order")
+            st.markdown("The computed deterministic boot sequence to prevent all circular dependencies:")
+            
+            html_content = '<div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center; padding: 20px 0;">'
+            
+            for idx, task in enumerate(topo_order):
+                is_critical = task in critical_path
+                bg_color = "linear-gradient(135deg, #ef4444, #b91c1c)" if is_critical else "rgba(255, 255, 255, 0.05)"
+                border = "1px solid rgba(239, 68, 68, 0.5)" if is_critical else "1px solid rgba(255, 255, 255, 0.1)"
+                font_weight = "800" if is_critical else "600"
+                
+                html_content += f'''
+                <div style="
+                    background: {bg_color};
+                    border: {border};
+                    padding: 10px 16px;
+                    border-radius: 8px;
+                    color: white;
+                    font-family: 'Outfit', sans-serif;
+                    font-weight: {font_weight};
+                    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+                ">
+                    <span style="opacity: 0.6; font-size: 0.8em; margin-right: 6px;">{idx+1}</span>
+                    {task}
+                </div>
+                '''
+                
+                if idx < len(topo_order) - 1:
+                    html_content += '<div style="color: #64748b; font-weight: bold; font-size: 1.2em;">➔</div>'
+                    
+            html_content += '</div>'
+            st.markdown(html_content, unsafe_allow_html=True)
+            
+            st.info("💡 **Note:** Nodes highlighted in **red** belong to the Critical Path and dictate the absolute minimum Makespan of the network.")
 
 except Exception as e:
     st.error(f"Failed to compile scheduling pipeline: {e}")
