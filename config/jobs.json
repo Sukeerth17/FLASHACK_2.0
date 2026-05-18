@@ -1,0 +1,58 @@
+[
+  {
+    "id": "job_os_update",
+    "name": "OS Patch Update",
+    "service_type": "BANDWIDTH",
+    "duration": 6,
+    "priority": "LOW",
+    "dependencies": []
+  },
+  {
+    "id": "job_backup",
+    "name": "Database Backup",
+    "service_type": "BANDWIDTH",
+    "duration": 8,
+    "priority": "LOW",
+    "dependencies": []
+  },
+  {
+    "id": "job_video_stream",
+    "name": "CEO Video Conference",
+    "service_type": "BANDWIDTH",
+    "duration": 4,
+    "priority": "CRITICAL",
+    "dependencies": []
+  },
+  {
+    "id": "job_data_sync",
+    "name": "Cloud Data Sync",
+    "service_type": "BANDWIDTH",
+    "duration": 5,
+    "priority": "MEDIUM",
+    "dependencies": []
+  },
+  {
+    "id": "job_dns_requests",
+    "name": "Client DNS Requests",
+    "service_type": "BANDWIDTH",
+    "duration": 2,
+    "priority": "HIGH",
+    "dependencies": []
+  },
+  {
+    "id": "job_file_download",
+    "name": "Large File Download",
+    "service_type": "BANDWIDTH",
+    "duration": 7,
+    "priority": "MEDIUM",
+    "dependencies": []
+  },
+  {
+    "id": "job_log_upload",
+    "name": "Telemetry Log Upload",
+    "service_type": "BANDWIDTH",
+    "duration": 3,
+    "priority": "LOW",
+    "dependencies": []
+  }
+]
