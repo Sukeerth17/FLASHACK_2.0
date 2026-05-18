@@ -1,5 +1,6 @@
 import time
 import threading
+from concurrent.futures import ThreadPoolExecutor
 from typing import Dict, List, Optional
 from shared.constants import TaskState, Priority, TimeOfDay
 from scheduler.job import Task
@@ -54,6 +55,7 @@ class PriorityScheduler:
         self.history: List[dict] = []
         self.context_switch_logs: List[str] = []
         self.start_time = 0.0
+        self.thread_pool = ThreadPoolExecutor(max_workers=10)
 
     def apply_time_of_day_policy(self, task: Task):
         """Dynamic Priority Adjustment based on Time of Day"""
@@ -69,19 +71,15 @@ class PriorityScheduler:
                 task.current_priority = Priority.LOW
 
     def _task_worker(self, task: Task):
-        """Thread worker for each network job. Blocks when preempted."""
-        while task.remaining_time > 0:
-            task._pause_event.wait() # Block if preempted
-            if task.state == TaskState.RUNNING:
-                time.sleep(self.time_policy.tick_delay_ms / 1000.0)
-                task.remaining_time -= 1
+        """Thread worker from the pool. Exits if preempted to free the thread."""
+        while task.remaining_time > 0 and task.state == TaskState.RUNNING:
+            time.sleep(self.time_policy.tick_delay_ms / 1000.0)
+            task.remaining_time -= 1
                 
-        # Thread completion
-        if task.state != TaskState.SKIPPED:
+        # If the task completed its duration naturally without being preempted
+        if task.remaining_time <= 0 and task.state == TaskState.RUNNING:
             task.state = TaskState.COMPLETED
-            # End time relative to current_tick approx
             task.end_time = time.time() - self.start_time
-            task._completion_event.set()
 
     def run_simulation(self, simulate_failure_node: str = None) -> List[dict]:
         self.history = []
@@ -96,15 +94,6 @@ class PriorityScheduler:
             elif not task.dependencies:
                 task.state = TaskState.READY
                 self.apply_time_of_day_policy(task)
-
-        # Start task threads in paused state
-        threads = []
-        for task in self.tasks.values():
-            task._pause_event.clear()
-            t = threading.Thread(target=self._task_worker, args=(task,))
-            t.daemon = True
-            t.start()
-            threads.append(t)
 
         current_tick = 0
         while not all(task.state in (TaskState.COMPLETED, TaskState.SKIPPED, TaskState.FAILED) for task in self.tasks.values()):
@@ -159,6 +148,7 @@ class PriorityScheduler:
                     if srv.available_capacity > 0:
                         srv.allocate(task)
                         task.start(current_tick, srv.id)
+                        self.thread_pool.submit(self._task_worker, task)
                         self.context_switch_logs.append(f"[{current_tick}] ▶️ SCHEDULED: {task.id} (Priority: {task.current_priority.name}) on {srv.name}")
                     else:
                         lowest_running = min(srv.running_tasks, key=lambda t: int(t.current_priority), default=None)
@@ -171,6 +161,7 @@ class PriorityScheduler:
                             # Allocate operation
                             srv.allocate(task)
                             task.start(current_tick, srv.id) # Sets event lock unpausing the thread
+                            self.thread_pool.submit(self._task_worker, task)
                             self.context_switch_logs.append(f"[{current_tick}] ▶️ SCHEDULED: {task.id} took over {srv.name}")
 
             # Snapshot capture
@@ -207,6 +198,7 @@ class PriorityScheduler:
             if not task.is_completed() and task.state != TaskState.SKIPPED:
                  task._pause_event.set()
                  task._completion_event.set()
+        self.thread_pool.shutdown(wait=False)
 
         self.metrics_collector.calculate_metrics(list(self.tasks.values()), self.services, current_tick)
         return self.history
