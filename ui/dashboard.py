@@ -347,6 +347,7 @@ try:
         with tab_dfs:
             st.subheader("Depth-First Search Topological Order")
             st.markdown("The computed deterministic boot sequence to prevent all circular dependencies:")
+            st.error("🚨 **Nodes in RED represent the Critical Path.** This is the longest chain of dependencies in your network. Any delay in these specific tasks will directly delay the entire network's boot time.")
             
             html_content = '<div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center; padding: 20px 0;">'
             
@@ -355,22 +356,24 @@ try:
                 bg_color = "linear-gradient(135deg, #ef4444, #b91c1c)" if is_critical else "rgba(255, 255, 255, 0.05)"
                 border = "1px solid rgba(239, 68, 68, 0.5)" if is_critical else "1px solid rgba(255, 255, 255, 0.1)"
                 font_weight = "800" if is_critical else "600"
+                badge = '<div style="font-size: 0.6em; text-transform: uppercase; letter-spacing: 1px; color: #fca5a5; margin-top: 4px;">🔥 Critical Bottleneck</div>' if is_critical else ''
                 
-                html_content += f'''
-                <div style="
-                    background: {bg_color};
-                    border: {border};
-                    padding: 10px 16px;
-                    border-radius: 8px;
-                    color: white;
-                    font-family: 'Outfit', sans-serif;
-                    font-weight: {font_weight};
-                    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-                ">
-                    <span style="opacity: 0.6; font-size: 0.8em; margin-right: 6px;">{idx+1}</span>
-                    {task}
-                </div>
-                '''
+                html_content += f"""<div style="
+background: {bg_color};
+border: {border};
+padding: 10px 16px;
+border-radius: 8px;
+color: white;
+font-family: 'Outfit', sans-serif;
+font-weight: {font_weight};
+box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+display: flex;
+flex-direction: column;
+align-items: center;
+">
+<div><span style="opacity: 0.6; font-size: 0.8em; margin-right: 6px;">{idx+1}</span>{task}</div>
+{badge}
+</div>"""
                 
                 if idx < len(topo_order) - 1:
                     html_content += '<div style="color: #64748b; font-weight: bold; font-size: 1.2em;">➔</div>'
