@@ -172,18 +172,33 @@ st.sidebar.markdown("---")
 show_config_editor = st.sidebar.checkbox("Show JSON Editors")
 
 if show_config_editor:
-    st.subheader("Edit Services Configuration")
-    services_str = st.text_area("services.json content", value=json.dumps(services_data, indent=2), height=150)
+    st.markdown("---")
+    st.subheader("Edit Configuration Manually")
     
-    st.subheader("Edit Jobs Configuration")
-    jobs_str = st.text_area("jobs.json content", value=json.dumps(jobs_data, indent=2), height=250)
-    
-    try:
-        services_data = json.loads(services_str)
-        jobs_data = json.loads(jobs_str)
-        st.success("JSON configurations loaded from editor successfully!")
-    except Exception as e:
-        st.error(f"Error parsing JSON text: {e}")
+    with st.form("json_editor_form"):
+        st.markdown("Modify the JSON settings below. Changes will not be executed until you click **Run Simulation**.")
+        services_str = st.text_area("services.json content", value=json.dumps(services_data, indent=2), height=200)
+        jobs_str = st.text_area("jobs.json content", value=json.dumps(jobs_data, indent=2), height=250)
+        
+        submitted = st.form_submit_button("▶️ Run Simulation", type="primary", use_container_width=True)
+        
+        if submitted:
+            try:
+                # Validate JSON first
+                parsed_services = json.loads(services_str)
+                parsed_jobs = json.loads(jobs_str)
+                
+                # Write to files to persist across reruns
+                with open("config/services.json", "w") as f:
+                    json.dump(parsed_services, f, indent=2)
+                with open("config/jobs.json", "w") as f:
+                    json.dump(parsed_jobs, f, indent=2)
+                    
+                services_data = parsed_services
+                jobs_data = parsed_jobs
+                st.success("JSON configurations successfully saved and applied!")
+            except Exception as e:
+                st.error(f"Error parsing JSON text: {e}")
 
 # Combine both services (boot sequence) and jobs (bandwidth tasks) for the simulation
 # In a real scenario, boot finishes first, then jobs run. But here we'll map both to the DAG or treat jobs independently.
