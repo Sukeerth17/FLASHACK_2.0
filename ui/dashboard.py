@@ -230,15 +230,10 @@ try:
         scheduler.time_policy.time_of_day = TimeOfDay(time_of_day)
         scheduler.aging_policy.aging_threshold = aging_threshold
         
-        # Apply manual failure if requested
-        if simulate_failure != "None":
-            # Just marking it failed isn't enough, we need to let the failure propagation handle it dynamically or before start
-            # The Dispatcher logic already handles SKIPPED if parent is FAILED or SKIPPED
-            scheduler.tasks[simulate_failure].state = TaskState.FAILED
-        
         # Run entire simulation to compile metrics
         with st.spinner("Running Multithreaded Job Simulation..."):
-            simulation_history = scheduler.run_simulation()
+            fail_node = simulate_failure if simulate_failure != "None" else None
+            simulation_history = scheduler.run_simulation(fail_node)
             metrics = scheduler.metrics_collector.get_summary()
         
         # Grid layout for summary stats

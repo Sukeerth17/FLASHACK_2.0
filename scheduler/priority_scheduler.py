@@ -83,7 +83,7 @@ class PriorityScheduler:
             task.end_time = time.time() - self.start_time
             task._completion_event.set()
 
-    def run_simulation(self) -> List[dict]:
+    def run_simulation(self, simulate_failure_node: str = None) -> List[dict]:
         self.history = []
         self.context_switch_logs = []
         self.start_time = time.time()
@@ -91,7 +91,9 @@ class PriorityScheduler:
         # Setup and apply time of day to ready tasks
         for task in self.tasks.values():
             task.reset()
-            if not task.dependencies:
+            if simulate_failure_node and task.id == simulate_failure_node:
+                task.state = TaskState.FAILED
+            elif not task.dependencies:
                 task.state = TaskState.READY
                 self.apply_time_of_day_policy(task)
 
@@ -105,7 +107,7 @@ class PriorityScheduler:
             threads.append(t)
 
         current_tick = 0
-        while not all(task.state in (TaskState.COMPLETED, TaskState.SKIPPED) for task in self.tasks.values()):
+        while not all(task.state in (TaskState.COMPLETED, TaskState.SKIPPED, TaskState.FAILED) for task in self.tasks.values()):
             # 1. Release completed/skipped tasks
             for service in self.services.values():
                 completed = [t for t in service.running_tasks if t.is_completed() or t.state == TaskState.SKIPPED]
