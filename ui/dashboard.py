@@ -1,4 +1,7 @@
 import os
+import sys
+# Ensure the root 'packetpath' directory is in the Python path
+sys.path.append(os.path.abspath(os.path.dirname(os.path.dirname(__file__))))
 import json
 import streamlit as st
 import pandas as pd
@@ -177,7 +180,7 @@ try:
             with col_graph_left:
                 st.subheader("DFS Topological DAG")
                 viz = GraphVisualizer(adj_list, nodes)
-                temp_graph_path = os.path.join(st.secrets.get("TEMP_DIR", "/tmp"), "st_graph.png") if "TEMP_DIR" in st.secrets else "st_graph.png"
+                temp_graph_path = "st_graph.png"
                 fig = viz.plot_graph_graphical(critical_path, temp_graph_path)
                 if fig:
                     st.image(temp_graph_path, use_column_width=True)
