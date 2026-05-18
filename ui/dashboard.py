@@ -318,7 +318,11 @@ try:
                 col_q2.metric("Running Queue (Executing)", len(q_run))
                 col_q3.metric("Pending Queue (Blocked)", len(q_wait))
                 
-                st.write("**Tasks in Ready Queue:**", q_ready)
+                if q_ready:
+                    badges = "".join([f'<span style="background: rgba(99, 102, 241, 0.2); border: 1px solid rgba(99, 102, 241, 0.5); padding: 4px 10px; border-radius: 12px; margin-right: 8px; margin-bottom: 8px; display: inline-block; font-family: monospace; color: #818cf8; font-size: 0.85em;">{t}</span>' for t in q_ready])
+                    st.markdown(f"<div style='margin-bottom: 10px;'><b>Tasks in Ready Queue:</b></div><div>{badges}</div>", unsafe_allow_html=True)
+                else:
+                    st.markdown("<div style='margin-bottom: 10px;'><b>Tasks in Ready Queue:</b> <span style='color: #64748b; font-style: italic;'>Queue is empty</span></div>", unsafe_allow_html=True)
                 
                 st.subheader("Bandwidth Capacity Used")
                 
