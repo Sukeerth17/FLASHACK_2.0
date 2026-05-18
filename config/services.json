@@ -3,7 +3,7 @@
     "id": "dns_server",
     "name": "DNS Server",
     "type": "CORE",
-    "capacity": 10,
+    "capacity": 1,
     "cost_per_tick": 1.0,
     "duration": 2,
     "dependencies": []
@@ -12,16 +12,18 @@
     "id": "auth_service",
     "name": "Authentication Service (LDAP)",
     "type": "CORE",
-    "capacity": 5,
+    "capacity": 1,
     "cost_per_tick": 2.0,
     "duration": 3,
-    "dependencies": ["dns_server"]
+    "dependencies": [
+      "dns_server"
+    ]
   },
   {
     "id": "database_master",
     "name": "Database Master Node",
     "type": "DATA",
-    "capacity": 8,
+    "capacity": 1,
     "cost_per_tick": 5.0,
     "duration": 4,
     "dependencies": []
@@ -30,88 +32,113 @@
     "id": "database_replica",
     "name": "Database Replica",
     "type": "DATA",
-    "capacity": 8,
+    "capacity": 1,
     "cost_per_tick": 3.0,
     "duration": 3,
-    "dependencies": ["database_master"]
+    "dependencies": [
+      "database_master"
+    ]
   },
   {
     "id": "web_proxy",
     "name": "Web Gateway Proxy",
     "type": "EDGE",
-    "capacity": 2,
+    "capacity": 1,
     "cost_per_tick": 1.5,
     "duration": 2,
-    "dependencies": ["dns_server"]
+    "dependencies": [
+      "dns_server"
+    ]
   },
   {
     "id": "firewall",
     "name": "Perimeter Firewall",
     "type": "SECURITY",
-    "capacity": 100,
+    "capacity": 1,
     "cost_per_tick": 4.0,
     "duration": 5,
-    "dependencies": ["auth_service", "web_proxy"]
+    "dependencies": [
+      "auth_service",
+      "web_proxy"
+    ]
   },
   {
     "id": "vpn_gateway",
     "name": "VPN Gateway",
     "type": "SECURITY",
-    "capacity": 15,
+    "capacity": 1,
     "cost_per_tick": 3.5,
     "duration": 4,
-    "dependencies": ["firewall", "auth_service"]
+    "dependencies": [
+      "firewall",
+      "auth_service"
+    ]
   },
   {
     "id": "log_server",
     "name": "Central Log Server",
     "type": "MONITORING",
-    "capacity": 50,
+    "capacity": 1,
     "cost_per_tick": 1.0,
     "duration": 2,
-    "dependencies": ["database_replica"]
+    "dependencies": [
+      "database_replica"
+    ]
   },
   {
     "id": "monitor_agent",
     "name": "Monitoring Agent",
     "type": "MONITORING",
-    "capacity": 100,
+    "capacity": 1,
     "cost_per_tick": 0.5,
     "duration": 1,
-    "dependencies": ["log_server", "dns_server"]
+    "dependencies": [
+      "log_server",
+      "dns_server"
+    ]
   },
   {
     "id": "load_balancer",
     "name": "Load Balancer",
     "type": "EDGE",
-    "capacity": 2,
+    "capacity": 1,
     "cost_per_tick": 2.5,
     "duration": 3,
-    "dependencies": ["web_proxy"]
+    "dependencies": [
+      "web_proxy"
+    ]
   },
   {
     "id": "email_server",
     "name": "Email Server",
     "type": "COMMUNICATION",
-    "capacity": 10,
+    "capacity": 1,
     "cost_per_tick": 2.0,
     "duration": 4,
-    "dependencies": ["dns_server", "database_master", "firewall"]
+    "dependencies": [
+      "dns_server",
+      "database_master",
+      "firewall"
+    ]
   },
   {
     "id": "intranet_portal",
     "name": "Intranet Web Portal",
     "type": "WEB",
-    "capacity": 15,
+    "capacity": 1,
     "cost_per_tick": 2.0,
     "duration": 3,
-    "dependencies": ["auth_service", "database_replica", "load_balancer"]
+    "dependencies": [
+      "auth_service",
+      "database_replica",
+      "load_balancer"
+    ]
   },
   {
     "id": "cache_server",
     "name": "Redis Cache Server",
     "type": "DATA",
-    "capacity": 30,
+    "capacity": 1,
     "cost_per_tick": 1.5,
     "duration": 2,
     "dependencies": []
@@ -120,27 +147,36 @@
     "id": "api_gateway",
     "name": "API Gateway",
     "type": "EDGE",
-    "capacity": 2,
+    "capacity": 1,
     "cost_per_tick": 3.0,
     "duration": 3,
-    "dependencies": ["auth_service", "cache_server"]
+    "dependencies": [
+      "auth_service",
+      "cache_server"
+    ]
   },
   {
     "id": "payment_gateway",
     "name": "Payment Processing Gateway",
     "type": "EXTERNAL",
-    "capacity": 5,
+    "capacity": 1,
     "cost_per_tick": 8.0,
     "duration": 4,
-    "dependencies": ["api_gateway", "firewall", "database_master"]
+    "dependencies": [
+      "api_gateway",
+      "firewall",
+      "database_master"
+    ]
   },
   {
     "id": "backup_agent",
     "name": "Backup Agent",
     "type": "MAINTENANCE",
-    "capacity": 5,
+    "capacity": 1,
     "cost_per_tick": 1.0,
     "duration": 2,
-    "dependencies": ["database_replica"]
+    "dependencies": [
+      "database_replica"
+    ]
   }
 ]

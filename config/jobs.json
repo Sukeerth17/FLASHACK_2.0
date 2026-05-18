@@ -1,58 +1,66 @@
 [
   {
-    "id": "job_os_update",
-    "name": "OS Patch Update",
+    "id": "job_low_1",
+    "name": "Background Sync 1",
     "service_type": "BANDWIDTH",
-    "duration": 6,
+    "duration": 20,
     "priority": "LOW",
     "dependencies": []
   },
   {
-    "id": "job_backup",
-    "name": "Database Backup",
+    "id": "job_low_2",
+    "name": "Background Sync 2",
     "service_type": "BANDWIDTH",
-    "duration": 8,
+    "duration": 20,
     "priority": "LOW",
     "dependencies": []
   },
   {
-    "id": "job_video_stream",
-    "name": "CEO Video Conference",
+    "id": "job_low_3",
+    "name": "Background Sync 3",
     "service_type": "BANDWIDTH",
-    "duration": 4,
+    "duration": 20,
+    "priority": "LOW",
+    "dependencies": []
+  },
+  {
+    "id": "job_low_4",
+    "name": "Background Sync 4",
+    "service_type": "BANDWIDTH",
+    "duration": 20,
+    "priority": "LOW",
+    "dependencies": []
+  },
+  {
+    "id": "job_low_5",
+    "name": "Background Sync 5",
+    "service_type": "BANDWIDTH",
+    "duration": 20,
+    "priority": "LOW",
+    "dependencies": []
+  },
+  {
+    "id": "job_starver_1",
+    "name": "Starving Job A",
+    "service_type": "BANDWIDTH",
+    "duration": 15,
+    "priority": "LOW",
+    "dependencies": []
+  },
+  {
+    "id": "job_starver_2",
+    "name": "Starving Job B",
+    "service_type": "BANDWIDTH",
+    "duration": 15,
+    "priority": "LOW",
+    "dependencies": []
+  },
+  {
+    "id": "job_critical_preemptor",
+    "name": "CEO Video Call",
+    "service_type": "BANDWIDTH",
+    "duration": 10,
     "priority": "CRITICAL",
-    "dependencies": []
-  },
-  {
-    "id": "job_data_sync",
-    "name": "Cloud Data Sync",
-    "service_type": "BANDWIDTH",
-    "duration": 5,
-    "priority": "MEDIUM",
-    "dependencies": []
-  },
-  {
-    "id": "job_dns_requests",
-    "name": "Client DNS Requests",
-    "service_type": "BANDWIDTH",
-    "duration": 2,
-    "priority": "HIGH",
-    "dependencies": []
-  },
-  {
-    "id": "job_file_download",
-    "name": "Large File Download",
-    "service_type": "BANDWIDTH",
-    "duration": 7,
-    "priority": "MEDIUM",
-    "dependencies": []
-  },
-  {
-    "id": "job_log_upload",
-    "name": "Telemetry Log Upload",
-    "service_type": "BANDWIDTH",
-    "duration": 3,
-    "priority": "LOW",
-    "dependencies": []
+    "dependencies": ["database_replica"]
   }
 ]
