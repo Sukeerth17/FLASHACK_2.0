@@ -321,23 +321,71 @@ try:
                 st.write("**Tasks in Ready Queue:**", q_ready)
                 
                 st.subheader("Bandwidth Capacity Used")
-                srv_cols = st.columns(len(tick_data["services"]))
-                for idx, (srv_id, srv_status) in enumerate(tick_data["services"].items()):
-                    if idx < len(srv_cols):
-                        with srv_cols[idx]:
-                            st.metric(
-                                label=f"🖥️ {srv_id}",
-                                value=f"{srv_status['utilization']:.0f}% Util",
-                                delta=f"Active: {len(srv_status['running'])} threads"
-                            )
-
+                
+                # Wrap metrics into rows of 4 columns so names aren't truncated
+                cols_per_row = 4
+                services_items = list(tick_data["services"].items())
+                
+                for i in range(0, len(services_items), cols_per_row):
+                    cols = st.columns(cols_per_row)
+                    for j in range(cols_per_row):
+                        if i + j < len(services_items):
+                            srv_id, srv_status = services_items[i + j]
+                            with cols[j]:
+                                st.metric(
+                                    label=f"🖥️ {srv_id}",
+                                    value=f"{srv_status['utilization']:.0f}% Util",
+                                    delta=f"Active: {len(srv_status['running'])} threads"
+                                )
+                            
+                # Add spacing below grid
+                st.markdown("<br>", unsafe_allow_html=True)
+                
         with tab_logs:
             st.subheader("Central Dispatcher Thread Logs")
             st.markdown("Displays exact timestamped context switches, preemptions, starvation aging upgrades, and boot failures.")
-            log_text = ""
+            
+            filter_options = ["ALL", "SCHEDULED", "COMPLETED", "PREEMPTED", "AGING BOOST", "SKIPPED"]
+            selected_filter = st.selectbox("Filter Logs by Event Type:", filter_options)
+            
+            log_html = """
+            <div style="
+                background: rgba(0,0,0,0.3);
+                border: 1px solid rgba(255,255,255,0.1);
+                border-radius: 8px;
+                padding: 15px;
+                height: 400px;
+                overflow-y: auto;
+                font-family: monospace;
+                font-size: 0.9em;
+                line-height: 1.6;
+            ">
+            """
+            
+            has_logs = False
             for log in scheduler.context_switch_logs:
-                log_text += log + "\n"
-            st.text_area("Live Output Console", log_text, height=400)
+                if selected_filter == "ALL" or selected_filter in log:
+                    has_logs = True
+                    color = "#e2e8f0" # default gray
+                    
+                    if "SCHEDULED" in log:
+                        color = "#60a5fa" # Blue
+                    elif "COMPLETED" in log:
+                        color = "#4ade80" # Green
+                    elif "PREEMPTED" in log:
+                        color = "#f97316" # Orange
+                    elif "AGING BOOST" in log:
+                        color = "#facc15" # Yellow
+                    elif "SKIPPED" in log:
+                        color = "#ef4444" # Red
+                        
+                    log_html += f'<div style="color: {color}; margin-bottom: 4px;">{log}</div>'
+                    
+            if not has_logs:
+                log_html += '<div style="color: #94a3b8; font-style: italic;">No logs match the selected filter.</div>'
+                
+            log_html += "</div>"
+            st.markdown(log_html, unsafe_allow_html=True)
 
         with tab_dfs:
             st.subheader("Depth-First Search Topological Order")
